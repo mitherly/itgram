@@ -4,4 +4,6 @@ flask-sqlalchemy
 pycryptodome
 pillow
 eventlet
+gevent
+greenlet
 gunicorn
