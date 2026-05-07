@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user.username }}</title>
+    <style>
+        :root {
+            --bg-color: #f5f7fb;
+            --card-bg: #ffffff;
+            --text-primary: #222222;
+            --text-secondary: #666666;
+            --border-color: #e0e4f0;
+            --primary: #5468ff;
+        }
+        body.dark {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .profile-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        .avatar-container {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            overflow: hidden;
+            border: 3px solid var(--primary);
+        }
+        .avatar-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .username {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .bio {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            padding: 0 20px;
+        }
+        .btn {
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-card">
+        <div class="avatar-container">
+            <img src="/static/avatars/{{ user.avatar }}" alt="Аватар">
+        </div>
+        <div class="username">👤 {{ user.username }}</div>
+        <div class="bio">{{ user.bio or 'Описание отсутствует' }}</div>
+        <a href="/chat" class="btn">← Назад в чат</a>
+    </div>
+</body>
+</html>
