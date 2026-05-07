@@ -3,7 +3,7 @@ flask-socketio
 flask-sqlalchemy
 pycryptodome
 pillow
-eventlet
 gevent
+gevent-websocket
 greenlet
 gunicorn

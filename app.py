@@ -15,7 +15,7 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['UPLOAD_FOLDER'] = 'static/avatars'
 
 db = SQLAlchemy(app)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet', logger=False)
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='gevent', logger=False)
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
