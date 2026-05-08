@@ -9,7 +9,10 @@ from crypto_utils import generate_aes_key, encrypt_message, decrypt_message
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev_key_for_course')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///chat.db'
+DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///chat.db')
+if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
+    DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['UPLOAD_FOLDER'] = 'static/avatars'
