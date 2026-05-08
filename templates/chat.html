@@ -138,18 +138,6 @@
             font-weight: 600; cursor: pointer; font-size: 0.9rem;
         }
         .chat-header-username:hover { text-decoration: underline; }
-        .back-btn {
-            display: none;
-            align-items: center;
-            gap: 4px;
-            background: none;
-            border: none;
-            color: var(--primary);
-            font-size: 0.85rem;
-            cursor: pointer;
-            padding: 4px 6px;
-        }
-        .back-btn.hidden { display: none; }
         .encrypted-badge {
             background: #ffd700; color: #333; font-size: 0.6rem;
             padding: 2px 6px; border-radius: 10px; font-weight: 600;
@@ -259,12 +247,14 @@
             .header-actions { gap: 4px; }
             .profile-link { font-size: 0.75rem; padding: 3px 8px; }
             .logout { font-size: 0.7rem; padding: 4px 8px; }
+
             .sidebar {
                 width: 100%;
                 position: absolute;
                 left: 0; top: 0; bottom: 0;
                 z-index: 20;
             }
+
             .chat-area {
                 position: absolute;
                 left: 0; top: 0; bottom: 0; right: 0;
@@ -275,12 +265,81 @@
                 display: flex;
                 z-index: 30;
             }
+
             .back-btn {
                 display: inline-flex !important;
+                align-items: center;
+                gap: 4px;
+                background: none;
+                border: none;
+                color: var(--primary);
+                font-size: 0.9rem;
+                cursor: pointer;
+                padding: 4px 6px;
             }
-            .back-btn.hidden {
-                display: none !important;
+            .back-btn.hidden { display: none !important; }
+
+            .mobile-search-btn {
+                display: inline-flex !important;
+                align-items: center;
+                justify-content: center;
+                background: none;
+                border: 1px solid var(--border-color);
+                color: var(--text-primary);
+                font-size: 1rem;
+                cursor: pointer;
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                margin-left: auto;
+                margin-right: 4px;
             }
+
+            .mobile-search-overlay {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: var(--bg-color);
+                z-index: 200;
+                padding: 10px;
+            }
+            .mobile-search-overlay.show { display: flex; flex-direction: column; }
+
+            .mobile-search-header {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 10px;
+                padding-bottom: 10px;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .mobile-search-close {
+                background: none;
+                border: none;
+                color: var(--primary);
+                font-size: 0.95rem;
+                cursor: pointer;
+                padding: 8px 12px;
+                font-weight: 500;
+            }
+
+            .mobile-search-input {
+                flex: 1;
+                padding: 10px 14px;
+                border: 1px solid var(--border-color);
+                border-radius: 20px;
+                font-size: 0.9rem;
+                background: var(--input-bg);
+                color: var(--text-primary);
+                outline: none;
+            }
+
+            .mobile-search-results {
+                flex: 1;
+                overflow-y: auto;
+            }
+
             .msg {
                 max-width: 85%;
                 font-size: 0.85rem;
@@ -290,9 +349,12 @@
                 max-height: 160px;
             }
             .chat-header { padding: 6px 10px; font-size: 0.85rem; }
+            .chat-header-left { gap: 4px; }
             .chat-input-area { padding: 6px 8px; gap: 3px; }
             #msg-input { padding: 7px 10px; font-size: 0.85rem; }
             #send-btn, #emoji-btn, #file-btn, #sticker-btn { padding: 7px 10px; font-size: 0.9rem; }
+
+            #search-area { display: none; }
         }
     </style>
 </head>
@@ -321,6 +383,15 @@
             <div class="chat-list" id="chat-list"></div>
         </aside>
 
+        <!-- Мобильный поиск пользователей -->
+        <div class="mobile-search-overlay" id="mobile-search-overlay">
+            <div class="mobile-search-header">
+                <button class="mobile-search-close" onclick="closeMobileSearch()">← Назад</button>
+                <input type="text" class="mobile-search-input" id="mobile-search-input" placeholder="Поиск пользователей...">
+            </div>
+            <div class="mobile-search-results" id="mobile-search-results"></div>
+        </div>
+
         <main class="chat-area" id="chat-area">
             <div id="chat-header" class="hidden">
                 <div class="chat-header-left">
@@ -328,6 +399,7 @@
                     <img src="/static/avatars/default.png" class="chat-header-avatar" id="chat-avatar" onerror="this.src='/static/avatars/default.png'">
                     <a href="/profile/" class="chat-header-username" id="chat-username-link">...</a>
                     <span id="typing-indicator" class="typing-indicator" style="display:none;">печатает...</span>
+                    <button class="mobile-search-btn hidden" id="mobile-search-btn" onclick="openMobileSearch()">🔍</button>
                 </div>
                 <span class="encrypted-badge">🔐 E2EE</span>
             </div>
@@ -406,6 +478,7 @@
             document.getElementById('chat-area').classList.remove('fullscreen');
             document.getElementById('sidebar').style.display = 'flex';
             document.getElementById('back-btn').classList.add('hidden');
+            document.getElementById('mobile-search-btn').classList.add('hidden');
         }
 
         function openChatMobile(rid, uname) {
@@ -413,8 +486,49 @@
                 document.getElementById('chat-area').classList.add('fullscreen');
                 document.getElementById('sidebar').style.display = 'none';
                 document.getElementById('back-btn').classList.remove('hidden');
+                document.getElementById('mobile-search-btn').classList.remove('hidden');
             }
         }
+
+        // ============== МОБИЛЬНЫЙ ПОИСК ==============
+        function openMobileSearch() {
+            document.getElementById('mobile-search-overlay').classList.add('show');
+            document.getElementById('mobile-search-input').focus();
+        }
+
+        function closeMobileSearch() {
+            document.getElementById('mobile-search-overlay').classList.remove('show');
+            document.getElementById('mobile-search-input').value = '';
+            document.getElementById('mobile-search-results').innerHTML = '';
+        }
+
+        document.getElementById('mobile-search-input').addEventListener('input', function() {
+            const q = this.value.trim();
+            if (!q) {
+                document.getElementById('mobile-search-results').innerHTML = '';
+                return;
+            }
+            fetch(`/api/search?q=${encodeURIComponent(q)}`)
+                .then(r => r.json())
+                .then(users => {
+                    const results = document.getElementById('mobile-search-results');
+                    results.innerHTML = '';
+                    if (!users.length) {
+                        results.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:20px;font-size:0.85rem;">Никого не найдено</p>';
+                        return;
+                    }
+                    users.forEach(u => {
+                        const btn = document.createElement('button');
+                        btn.className = 'user-btn';
+                        btn.innerHTML = `<img src="/static/avatars/${u.avatar || 'default.png'}" class="avatar-small" onerror="this.src='/static/avatars/default.png'"> ${escapeHtml(u.username)}`;
+                        btn.addEventListener('click', () => {
+                            closeMobileSearch();
+                            openChat(u.id, u.username);
+                        });
+                        results.appendChild(btn);
+                    });
+                });
+        });
 
         // ============== ПЕРЕМЕННЫЕ ==============
         const CURRENT_USER = document.body.dataset.username;
