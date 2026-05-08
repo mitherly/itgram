@@ -20,6 +20,7 @@ app.config['UPLOAD_FOLDER'] = 'static/avatars'
 db = SQLAlchemy(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='gevent', logger=False)
 
+os.makedirs('static/wallpapers', exist_ok=True)
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 
@@ -482,6 +483,30 @@ def add_sticker_to_pack(pack_id):
     return jsonify({'id': sticker.id, 'emoji': emoji})
 
 
+# ---------- ОБОИ ЧАТА ----------
+@app.route('/api/wallpaper', methods=['POST'])
+def upload_wallpaper():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Auth'}), 401
+
+    if 'wallpaper' not in request.files:
+        return jsonify({'error': 'No file'}), 400
+
+    file = request.files['wallpaper']
+    if file.filename == '':
+        return jsonify({'error': 'No file'}), 400
+
+    ext = file.filename.rsplit('.', 1)[-1].lower()
+    if ext not in ['jpg', 'jpeg', 'png', 'webp']:
+        return jsonify({'error': 'Формат не поддерживается'}), 400
+
+    user = db.session.get(User, session['user_id'])
+    filename = f"wallpaper_{user.id}.{ext}"
+    filepath = os.path.join('static/wallpapers', filename)
+    os.makedirs('static/wallpapers', exist_ok=True)
+    file.save(filepath)
+
+    return jsonify({'status': 'ok', 'url': f'/static/wallpapers/{filename}'})
 # ---------- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ----------
 def get_room_name(user1_id, user2_id):
     return f"chat_{min(user1_id, user2_id)}_{max(user1_id, user2_id)}"
