@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вход</title>
+    <title>Айтиграм — Вход</title>
     <style>
         :root {
             --primary: #5468ff;
@@ -46,10 +46,6 @@
             cursor: pointer;
             padding: 6px 12px;
             border-radius: 20px;
-            transition: all 0.2s;
-        }
-        .theme-btn:hover {
-            background: var(--bg);
         }
         .auth-card {
             background: var(--card);
@@ -59,23 +55,40 @@
             max-width: 400px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
-          .logo-area {
-         display: flex;
-         align-items: center;
-         justify-content: center;
-         margin-bottom: 25px;
+        .logo-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
         }
-
-          /* === ЛОГОТИП === */
-         .custom-logo {
-         height: 100px;
-         width: auto;
-         max-width: 320px;
-         object-fit: contain;
-         image-rendering: -webkit-optimize-contrast;
-         image-rendering: crisp-edges;
+        .custom-logo {
+            height: 80px;
+            width: auto;
+            max-width: 280px;
+            object-fit: contain;
         }
-
+        .mode-switch {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 18px;
+        }
+        .mode-btn {
+            padding: 7px 16px;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: var(--card);
+            color: var(--text);
+            transition: all 0.2s;
+        }
+        .mode-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
         .form-group { margin-bottom: 18px; }
         .form-group label {
             display: block;
@@ -94,9 +107,7 @@
             color: var(--text);
             transition: border-color 0.2s;
         }
-        .form-group input:focus {
-            border-color: var(--primary);
-        }
+        .form-group input:focus { border-color: var(--primary); }
         .error {
             background: #ffebee;
             color: var(--error);
@@ -118,9 +129,7 @@
             cursor: pointer;
             transition: background 0.2s;
         }
-        .btn:hover {
-          background: var(--primary-hover);
-        }
+        .btn:hover { background: var(--primary-hover); }
         .switch {
             text-align: center;
             margin-top: 20px;
@@ -131,9 +140,7 @@
             text-decoration: none;
             font-weight: 500;
         }
-        .switch a:hover {
-            text-decoration: underline;
-        }
+        .switch a:hover { text-decoration: underline; }
         .traffic-note {
             text-align: center;
             font-size: 0.75rem;
@@ -148,8 +155,13 @@
     <button class="theme-btn" id="theme-toggle" title="Сменить тему">🌙</button>
     <div class="auth-card">
         <div class="logo-area">
-            <!-- === ВАШЕ ЛОГО === -->
             <img class="custom-logo" src="/static/logo.png" alt="Логотип">
+        </div>
+
+        <div class="mode-switch">
+            <button class="mode-btn active" id="mode-desktop" onclick="setMode('desktop')">🖥️ ПК</button>
+            <button class="mode-btn" id="mode-mobile" onclick="setMode('mobile')">📱 Телефон</button>
+            <button class="mode-btn" id="mode-auto" onclick="setMode('auto')">🔄 Авто</button>
         </div>
 
         {% if error %}
@@ -180,8 +192,7 @@
         (function() {
             const themeBtn = document.getElementById('theme-toggle');
             const body = document.body;
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') {
+            if (localStorage.getItem('theme') === 'dark') {
                 body.classList.add('dark');
                 themeBtn.textContent = '☀️';
             }
@@ -192,6 +203,17 @@
                 themeBtn.textContent = isDark ? '☀️' : '🌙';
             });
         })();
+
+        function setMode(mode) {
+            localStorage.setItem('display_mode', mode);
+            location.reload();
+        }
+
+        const savedMode = localStorage.getItem('display_mode') || 'auto';
+        document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+        if (savedMode === 'desktop') document.getElementById('mode-desktop').classList.add('active');
+        else if (savedMode === 'mobile') document.getElementById('mode-mobile').classList.add('active');
+        else document.getElementById('mode-auto').classList.add('active');
     </script>
 </body>
 </html>
