@@ -23,6 +23,14 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='gevent', logger=F
 os.makedirs('static/wallpapers', exist_ok=True)
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
+# ---------- ЗАЩИТНЫЕ ЗАГОЛОВКИ ----------
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' https://cdn.socket.io; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' wss:; frame-ancestors 'none'"
+    return response
 
 # ---------- МОДЕЛИ ----------
 class User(db.Model):
