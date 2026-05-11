@@ -215,7 +215,7 @@
             .chat-area { position: absolute; left: 0; top: 0; bottom: 0; right: 0; z-index: 10; display: none; }
             .chat-area.fullscreen-mobile { display: flex !important; z-index: 30; }
             .back-btn { display: none; }
-            .back-btn.show { display: inline-block !important; }
+            .back-btn.show { display: inline-block !important; font-size: 1.5rem; padding: 4px 8px; }
             .msg { max-width: 85% !important; }
             .msg-content img { max-width: 150px !important; max-height: 150px !important; }
             .header { padding: 6px 10px; }
@@ -256,15 +256,6 @@
             <div id="user-list"></div>
             <div class="chat-list" id="chat-list"></div>
         </aside>
-
-        <main class="chat-area" id="chat-area">
-            <div id="chat-header" class="hidden">
-                <div class="chat-header-left">
-                    <button class="back-btn" id="back-btn" onclick="goBack()">←</button>
-                    <img src="/static/avatars/default.png" class="chat-header-avatar" id="chat-avatar" onerror="this.src='/static/avatars/default.png'">
-                    <a href="/profile/" class="chat-header-username" id="chat-username-link">...</a>
-                    <span id="typing-indicator" class="typing-indicator" style="display:none;">печатает...</span>
-                </div>
                 <span class="encrypted-badge">🔐</span>
             </div>
 
