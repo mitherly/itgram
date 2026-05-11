@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Айтиграм</title>
+    <title>Айтиграм — E2E</title>
     <link rel="manifest" href="/static/manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -122,10 +122,6 @@
         .chat-header-left { display: flex; align-items: center; gap: 6px; }
         .chat-header-avatar { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; }
         .chat-header-username { color: var(--text-primary); text-decoration: none; font-weight: 600; cursor: pointer; font-size: 0.9rem; }
-        .back-btn {
-            display: none; background: none; border: none;
-            color: var(--primary); font-size: 1.2rem; cursor: pointer; padding: 4px 6px; margin-right: 2px;
-        }
         .encrypted-badge { background: #ffd700; color: #333; font-size: 0.6rem; padding: 2px 6px; border-radius: 10px; font-weight: 600; }
         .typing-indicator { color: var(--primary); font-size: 0.7rem; font-style: italic; animation: pulse 1.5s infinite; margin-left: 4px; }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
@@ -202,29 +198,9 @@
         .hidden { display: none !important; }
         .empty-state { text-align: center; color: var(--text-secondary); padding: 40px 20px; }
 
-        #mobile-search-overlay {
-            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: var(--bg-color); z-index: 200; padding: 10px; flex-direction: column;
-        }
-        #mobile-search-overlay.show { display: flex; }
-        .mobile-search-close { background: none; border: none; color: var(--primary); font-size: 1rem; cursor: pointer; padding: 8px 12px; }
-
         @media (max-width: 768px) {
-            .sidebar { width: 100% !important; position: absolute; left: 0; top: 0; bottom: 0; z-index: 20; padding-top: 50px !important; }
-            .sidebar.hidden-mobile { display: none !important; }
-            .chat-area { position: absolute; left: 0; top: 0; bottom: 0; right: 0; z-index: 10; display: none; }
-            .chat-area.fullscreen-mobile { display: flex !important; z-index: 30; }
-            .back-btn { display: none; }
-            .back-btn.show { display: inline-block !important; font-size: 1.5rem; padding: 4px 8px; }
-            .msg { max-width: 85% !important; }
-            .msg-content img { max-width: 150px !important; max-height: 150px !important; }
-            .header { padding: 6px 10px; }
-            .custom-logo { height: 28px; max-width: 120px; }
-            .chat-input-area { padding: 6px 8px; gap: 4px; }
-            #msg-input { padding: 8px 10px; font-size: 0.85rem; }
-            #send-btn, #emoji-btn, #file-btn, #sticker-btn { padding: 8px 10px; font-size: 0.9rem; }
-            #search-area { display: flex !important; position: sticky; top: 0; z-index: 5; background: var(--sidebar-bg); padding: 8px 0; }
-#user-list { max-height: 200px; overflow-y: auto; }
+            .sidebar { width: 100% !important; }
+            #search-area { display: flex !important; }
         }
 
         ::-webkit-scrollbar { width: 5px; }
@@ -256,7 +232,15 @@
             <div id="user-list"></div>
             <div class="chat-list" id="chat-list"></div>
         </aside>
-                <span class="encrypted-badge">🔐</span>
+
+        <main class="chat-area" id="chat-area">
+            <div id="chat-header" class="hidden">
+                <div class="chat-header-left">
+                    <img src="/static/avatars/default.png" class="chat-header-avatar" id="chat-avatar" onerror="this.src='/static/avatars/default.png'">
+                    <a href="/profile/" class="chat-header-username" id="chat-username-link">...</a>
+                    <span id="typing-indicator" class="typing-indicator" style="display:none;">печатает...</span>
+                </div>
+                <span class="encrypted-badge">🔐 E2EE</span>
             </div>
 
             <div id="chat-messages" class="chat-messages">
@@ -286,14 +270,6 @@
         </main>
     </div>
 
-    <div id="mobile-search-overlay">
-        <div style="display:flex; gap:8px; margin-bottom:10px;">
-            <button class="mobile-search-close" onclick="closeMobileSearch()">← Назад</button>
-            <input type="text" id="mobile-search-input" placeholder="Поиск пользователей..." style="flex:1; padding:10px; border:1px solid var(--border-color); border-radius:20px; background:var(--input-bg); color:var(--text-primary); outline:none;">
-        </div>
-        <div id="mobile-search-results" style="flex:1; overflow-y:auto;"></div>
-    </div>
-
     <script>
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let audioCtx;
@@ -306,11 +282,6 @@
         document.getElementById('wallpaper-btn').addEventListener('click',()=>document.getElementById('wallpaper-input').click());
         document.getElementById('wallpaper-input').addEventListener('change',function(){const f=this.files[0];if(!f)return;const fd=new FormData();fd.append('wallpaper',f);fetch('/api/wallpaper',{method:'POST',body:fd}).then(r=>r.json()).then(d=>{if(d.url){localStorage.setItem('wallpaper_url',d.url);document.getElementById('chat-messages').style.backgroundImage=`url(${d.url})`;document.getElementById('chat-messages').classList.add('has-wallpaper');}});this.value='';});
         const sw=localStorage.getItem('wallpaper_url');if(sw){document.getElementById('chat-messages').style.backgroundImage=`url(${sw})`;document.getElementById('chat-messages').classList.add('has-wallpaper');}
-
-        function goBack(){document.getElementById('sidebar').classList.remove('hidden-mobile');document.getElementById('chat-area').classList.remove('fullscreen-mobile');document.getElementById('back-btn').classList.remove('show');}
-        function openMobileSearch(){document.getElementById('mobile-search-overlay').classList.add('show');document.getElementById('mobile-search-input').focus();}
-        function closeMobileSearch(){document.getElementById('mobile-search-overlay').classList.remove('show');document.getElementById('mobile-search-input').value='';document.getElementById('mobile-search-results').innerHTML='';}
-        document.getElementById('mobile-search-input').addEventListener('input',function(){const q=this.value.trim();if(!q){document.getElementById('mobile-search-results').innerHTML='';return;}fetch(`/api/search?q=${encodeURIComponent(q)}`).then(r=>r.json()).then(users=>{const r=document.getElementById('mobile-search-results');r.innerHTML='';if(!users.length){r.innerHTML='<p style="color:var(--text-secondary);text-align:center;padding:20px;">Никого не найдено</p>';return;}users.forEach(u=>{const b=document.createElement('button');b.className='user-btn';b.innerHTML=`<img src="/static/avatars/${u.avatar||'default.png'}" class="avatar-small" onerror="this.src='/static/avatars/default.png'"> ${escapeHtml(u.username)}`;b.addEventListener('click',()=>{closeMobileSearch();openChat(u.id,u.username);});r.appendChild(b);});});});
 
         const CURRENT_USER=document.body.dataset.username,CURRENT_USER_ID=parseInt(document.body.dataset.userId),socket=io();
         let currentReceiverId=parseInt(sessionStorage.getItem('chat_receiver_id'))||null,currentReceiverName=sessionStorage.getItem('chat_receiver_name')||null;
@@ -342,7 +313,7 @@
         function updateChatList(rid,rname,msg){if(rid===CURRENT_USER_ID)return;const idx=activeChats.findIndex(c=>c.id===rid);if(idx!==-1){activeChats[idx].lastMessage=msg;activeChats.unshift(activeChats.splice(idx,1)[0]);}else activeChats.unshift({id:rid,name:rname,lastMessage:msg});localStorage.setItem(CHATS_KEY,JSON.stringify(activeChats));renderChatList();}
         function addUnreadCount(sid){if(sid===currentReceiverId)return;unreadCounts[sid]=(unreadCounts[sid]||0)+1;localStorage.setItem(UNREAD_KEY,JSON.stringify(unreadCounts));renderChatList();}
 
-        function restoreChat(rid,uname){currentReceiverId=rid;currentReceiverName=uname;unreadCounts[rid]=0;localStorage.setItem(UNREAD_KEY,JSON.stringify(unreadCounts));document.getElementById('empty-state').classList.add('hidden');document.getElementById('chat-header').classList.remove('hidden');document.getElementById('chat-input-area').classList.remove('hidden');document.getElementById('typing-indicator').style.display='none';document.getElementById('msg-input').disabled=false;document.getElementById('send-btn').disabled=false;document.getElementById('chat-messages').innerHTML='';if(window.innerWidth<=768){document.getElementById('sidebar').classList.add('hidden-mobile');document.getElementById('chat-area').classList.add('fullscreen-mobile');document.getElementById('back-btn').classList.add('show');}fetch(`/api/user/${rid}`).then(r=>r.json()).then(data=>{document.getElementById('chat-avatar').src=`/static/avatars/${data.avatar||'default.png'}`;document.getElementById('chat-username-link').textContent=uname;document.getElementById('chat-username-link').href=`/profile/${rid}`;}).catch(()=>{document.getElementById('chat-avatar').src='/static/avatars/default.png';document.getElementById('chat-username-link').textContent=uname;document.getElementById('chat-username-link').href=`/profile/${rid}`;});socket.emit('join_chat',{receiver_id:rid});loadMessageHistory(rid);document.getElementById('msg-input').focus();renderChatList();}
+        function restoreChat(rid,uname){currentReceiverId=rid;currentReceiverName=uname;unreadCounts[rid]=0;localStorage.setItem(UNREAD_KEY,JSON.stringify(unreadCounts));document.getElementById('empty-state').classList.add('hidden');document.getElementById('chat-header').classList.remove('hidden');document.getElementById('chat-input-area').classList.remove('hidden');document.getElementById('typing-indicator').style.display='none';document.getElementById('msg-input').disabled=false;document.getElementById('send-btn').disabled=false;document.getElementById('chat-messages').innerHTML='';fetch(`/api/user/${rid}`).then(r=>r.json()).then(data=>{document.getElementById('chat-avatar').src=`/static/avatars/${data.avatar||'default.png'}`;document.getElementById('chat-username-link').textContent=uname;document.getElementById('chat-username-link').href=`/profile/${rid}`;}).catch(()=>{document.getElementById('chat-avatar').src='/static/avatars/default.png';document.getElementById('chat-username-link').textContent=uname;document.getElementById('chat-username-link').href=`/profile/${rid}`;});socket.emit('join_chat',{receiver_id:rid});loadMessageHistory(rid);document.getElementById('msg-input').focus();renderChatList();}
         function searchUsers(){const q=document.getElementById('search-input').value.trim();if(!q)return;fetch(`/api/search?q=${encodeURIComponent(q)}`).then(r=>r.json()).then(users=>{const ul=document.getElementById('user-list');ul.innerHTML='';users.forEach(u=>{const b=document.createElement('button');b.className='user-btn';b.innerHTML=`<img src="/static/avatars/${u.avatar||'default.png'}" class="avatar-small" onerror="this.src='/static/avatars/default.png'"> ${escapeHtml(u.username)}`;b.addEventListener('click',()=>{openChat(u.id,u.username);ul.innerHTML='';document.getElementById('search-input').value='';});ul.appendChild(b);});});}
         function openChat(rid,uname){sessionStorage.setItem('chat_receiver_id',rid);sessionStorage.setItem('chat_receiver_name',uname);restoreChat(rid,uname);}
         function loadMessageHistory(rid){fetch(`/api/messages/${rid}`).then(r=>r.json()).then(msgs=>{msgs.forEach(msg=>{const isOwn=msg.sender_id===CURRENT_USER_ID;if(msg.type==='file')addFileMessage(msg.sender_username,msg.file_name,msg.file_type,msg.is_image,isOwn,msg.timestamp,msg.id,msg.read,msg.is_image?msg.file_url:null,msg.sender_avatar);else addMessage(msg.sender_username,msg.text,isOwn,msg.timestamp,msg.id,msg.read,msg.sender_avatar);});msgs.forEach(msg=>{if(msg.sender_id!==CURRENT_USER_ID&&!msg.read)socket.emit('message_read',{message_id:msg.id,type:msg.type||'text'});});});}
