@@ -223,7 +223,8 @@
             .chat-input-area { padding: 6px 8px; gap: 4px; }
             #msg-input { padding: 8px 10px; font-size: 0.85rem; }
             #send-btn, #emoji-btn, #file-btn, #sticker-btn { padding: 8px 10px; font-size: 0.9rem; }
-            #search-area { display: flex !important; }
+            #search-area { display: flex !important; position: sticky; top: 0; z-index: 5; background: var(--sidebar-bg); padding: 8px 0; }
+#user-list { max-height: 200px; overflow-y: auto; }
         }
 
         ::-webkit-scrollbar { width: 5px; }
